@@ -2,26 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppState{
+class AppState {
   late String? username;
   late int themeColor;
   late String? currency;
+  late int? age;
+  late double? income;
 
   static Future<AppState> getState() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     int? themeColor = prefs.getInt("themeColor");
     String? username = prefs.getString("username");
     String? currency = prefs.getString("currency");
+    int? age = prefs.getInt("age");
+    double? income = prefs.getDouble("income");
 
     AppState appState = AppState();
     appState.themeColor = themeColor ?? Colors.green.value;
     appState.username = username;
     appState.currency = currency;
+    appState.age = age;
+    appState.income = income;
 
     return appState;
   }
 }
-class AppCubit extends Cubit<AppState>{
+
+class AppCubit extends Cubit<AppState> {
   AppCubit(AppState initialState) : super(initialState);
 
   Future<void> updateUsername(username) async {
@@ -35,9 +42,22 @@ class AppCubit extends Cubit<AppState>{
     await prefs.setString("currency", currency);
     emit(await AppState.getState());
   }
+
   Future<void> updateThemeColor(int color) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt("themeColor", color);
+    emit(await AppState.getState());
+  }
+
+  Future<void> updateAge(int age) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt("age", age);
+    emit(await AppState.getState());
+  }
+
+  Future<void> updateIncome(double income) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble("income", income);
     emit(await AppState.getState());
   }
 
@@ -46,7 +66,8 @@ class AppCubit extends Cubit<AppState>{
     await prefs.remove("currency");
     await prefs.remove("themeColor");
     await prefs.remove("username");
+    await prefs.remove("age");
+    await prefs.remove("income");
     emit(await AppState.getState());
   }
-
 }
