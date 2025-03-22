@@ -3,6 +3,7 @@ import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
 import 'package:expense_advisor/dao/account_dao.dart';
 import 'package:expense_advisor/dao/payment_dao.dart';
 import 'package:expense_advisor/events.dart';
+import 'package:expense_advisor/main.dart';
 import 'package:expense_advisor/model/account.model.dart';
 import 'package:expense_advisor/model/category.model.dart';
 import 'package:expense_advisor/model/payment.model.dart';
@@ -169,6 +170,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const TravelModeToggle(),
             const SizedBox(height: 15),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     showTransactionOverlay(
+            //       "Test SMS: Your account has been debited INR 500 for a transaction at Store ABC",
+            //       "TESTBANK",
+            //       500.0,
+            //     );
+            //   },
+            //   child: const Text("Test Overlay"),
+            // ),
             AccountsSlider(accounts: _accounts),
             const SizedBox(height: 15),
             Container(

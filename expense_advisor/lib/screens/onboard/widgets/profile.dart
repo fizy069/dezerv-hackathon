@@ -16,6 +16,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _incomeController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -25,6 +26,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     _nameController.text = cubit.state.username ?? '';
     _ageController.text = cubit.state.age?.toString() ?? '';
     _incomeController.text = cubit.state.income?.toString() ?? '';
+    _emailController.text = cubit.state.email ?? '';
   }
 
   @override
@@ -32,6 +34,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     _nameController.dispose();
     _ageController.dispose();
     _incomeController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -57,6 +60,11 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       // Save income if provided
       if (_incomeController.text.isNotEmpty) {
         await cubit.updateIncome(double.parse(_incomeController.text));
+      }
+
+      // Save email if provided
+      if (_emailController.text.isNotEmpty) {
+        await cubit.updateEmail(_emailController.text);
       }
 
       widget.onGetStarted();
@@ -111,6 +119,31 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      prefixIcon: const Icon(Icons.email),
+                      hintText: "Enter your email address",
+                      label: const Text("Email"),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value != null && value.isNotEmpty) {
+                        final emailRegex = RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        );
+                        if (!emailRegex.hasMatch(value)) {
+                          return 'Please enter a valid email address';
+                        }
                       }
                       return null;
                     },
