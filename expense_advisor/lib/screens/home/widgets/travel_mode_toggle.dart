@@ -39,6 +39,7 @@ class TravelModeToggle extends StatelessWidget {
                 ],
               ),
               if (state.travelModeActive) _buildActiveTripInfo(context, state),
+              SizedBox(height: 5),
             ],
           ),
         );

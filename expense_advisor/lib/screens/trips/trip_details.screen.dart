@@ -16,17 +16,23 @@ class TripDetailsScreen extends StatefulWidget {
   State<TripDetailsScreen> createState() => _TripDetailsScreenState();
 }
 
-class _TripDetailsScreenState extends State<TripDetailsScreen> {
+class _TripDetailsScreenState extends State<TripDetailsScreen>
+    with SingleTickerProviderStateMixin {
   late Trip _trip;
   bool _isLoading = false;
   final TripService _tripService = TripService();
   List<User> _users = [];
   String _userId = '';
+  late TabController _tabController;
+
+  // Map to store who owes whom
+  Map<String, Map<String, double>> _settlements = {};
 
   @override
   void initState() {
     super.initState();
     _trip = widget.trip;
+    _tabController = TabController(length: 2, vsync: this);
     _loadUsers();
 
     // Find current user's ID
@@ -36,6 +42,85 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         'guest@example.com';
 
     _userId = email; // Temporarily use email as ID until users are loaded
+
+    // Calculate the settlements
+    _calculateSettlements();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // Calculate who owes whom
+  void _calculateSettlements() {
+    // Clear previous settlements
+    _settlements = {};
+
+    // Step 1: Calculate total expenses
+    double totalExpenses = _trip.transactions.fold(
+      0,
+      (sum, transaction) => sum + transaction.amount,
+    );
+
+    // Step 2: Calculate per-person expenses
+    Map<String, double> paid = {};
+    for (var userId in _trip.users) {
+      paid[userId] = 0;
+    }
+
+    for (var transaction in _trip.transactions) {
+      paid[transaction.userId] =
+          (paid[transaction.userId] ?? 0) + transaction.amount;
+    }
+
+    // Step 3: Calculate equal share per person
+    double equalShare = totalExpenses / _trip.users.length;
+
+    // Step 4: Calculate net balance (positive means you're owed money, negative means you owe)
+    Map<String, double> balance = {};
+    for (var userId in _trip.users) {
+      balance[userId] = (paid[userId] ?? 0) - equalShare;
+    }
+
+    // Step 5: Determine who pays whom
+    List<String> creditors = []; // People who paid more (positive balance)
+    List<String> debtors = []; // People who paid less (negative balance)
+
+    for (var entry in balance.entries) {
+      if (entry.value > 0) {
+        creditors.add(entry.key);
+      } else if (entry.value < 0) {
+        debtors.add(entry.key);
+      }
+    }
+
+    // Step 6: Calculate settlements
+    for (var creditor in creditors) {
+      if (!_settlements.containsKey(creditor)) {
+        _settlements[creditor] = {};
+      }
+
+      double remainingCredit = balance[creditor]!;
+
+      for (var debtor in debtors) {
+        if (remainingCredit <= 0 || balance[debtor]! >= 0) continue;
+
+        double debtorOwes = -balance[debtor]!;
+        double settlement =
+            remainingCredit < debtorOwes ? remainingCredit : debtorOwes;
+
+        // Record the settlement
+        _settlements[creditor]![debtor] = settlement;
+
+        // Update remaining balances
+        remainingCredit -= settlement;
+        balance[debtor] = balance[debtor]! + settlement;
+
+        if (remainingCredit <= 0.01) break; // Account for floating point errors
+      }
+    }
   }
 
   Future<void> _loadUsers() async {
@@ -184,6 +269,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         if (trip.id == _trip.id) {
           setState(() {
             _trip = trip;
+            // Recalculate settlements after refreshing trip data
+            _calculateSettlements();
           });
           break;
         }
@@ -210,12 +297,24 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             onPressed: _refreshTripData,
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [Tab(text: 'Expenses'), Tab(text: 'Settlement')],
+        ),
       ),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : Column(
-                children: [_buildTripSummary(), _buildTransactionsList()],
+              : TabBarView(
+                controller: _tabController,
+                children: [
+                  // Expenses Tab
+                  Column(
+                    children: [_buildTripSummary(), _buildTransactionsList()],
+                  ),
+                  // Settlement Tab
+                  _buildSettlementsView(),
+                ],
               ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addExpense,
@@ -319,7 +418,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       ? Theme.of(context).colorScheme.primary
                       : Colors.grey,
               child: Text(
-                userName.substring(0, 1).toUpperCase(),
+                userName.isNotEmpty
+                    ? userName.substring(0, 1).toUpperCase()
+                    : '?',
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -335,5 +436,155 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildSettlementsView() {
+    // Calculate total expenses
+    double totalExpenses = _trip.transactions.fold(
+      0,
+      (sum, transaction) => sum + transaction.amount,
+    );
+
+    // If no expenses, show message
+    if (totalExpenses == 0) {
+      return const Center(child: Text('No expenses to settle'));
+    }
+
+    // Calculate equal share per person
+    double equalShare = totalExpenses / _trip.users.length;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Summary',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total trip expenses:'),
+                      Text(
+                        '\$${totalExpenses.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Equal share per person:'),
+                      Text(
+                        '\$${equalShare.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          Text('Settlements', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 16),
+
+          // No settlements case
+          if (_settlements.isEmpty)
+            const Center(child: Text('Everyone has paid their fair share!')),
+
+          // Settlements list
+          ..._buildSettlementList(),
+
+          const SizedBox(height: 32),
+          const Divider(),
+          const SizedBox(height: 16),
+
+          // Explanation text
+          Text('How it works:', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          const Text(
+            'We calculate the total expenses and divide them equally among all participants. '
+            'Then we figure out who paid more than their share and who paid less. '
+            'The settlements above show the minimum number of transactions needed to '
+            'balance everyone\'s contributions.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildSettlementList() {
+    List<Widget> settlements = [];
+
+    _settlements.forEach((creditorId, debtors) {
+      String creditorName = _getUserNameById(creditorId);
+      bool isCreditorCurrentUser = creditorId == _userId;
+
+      debtors.forEach((debtorId, amount) {
+        String debtorName = _getUserNameById(debtorId);
+        bool isDebtorCurrentUser = debtorId == _userId;
+
+        // Format the message
+        String message;
+        if (isCreditorCurrentUser) {
+          message = '$debtorName owes you';
+        } else if (isDebtorCurrentUser) {
+          message = 'You owe $creditorName';
+        } else {
+          message = '$debtorName owes $creditorName';
+        }
+
+        settlements.add(
+          Card(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            color:
+                isCreditorCurrentUser || isDebtorCurrentUser
+                    ? Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withOpacity(0.3)
+                    : null,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor:
+                    isDebtorCurrentUser
+                        ? Colors.red
+                        : isCreditorCurrentUser
+                        ? Colors.green
+                        : Colors.grey,
+                child: Icon(
+                  isDebtorCurrentUser
+                      ? Icons.arrow_upward
+                      : isCreditorCurrentUser
+                      ? Icons.arrow_downward
+                      : Icons.swap_horiz,
+                  color: Colors.white,
+                ),
+              ),
+              title: Text(message),
+              trailing: Text(
+                '\$${amount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        );
+      });
+    });
+
+    return settlements;
   }
 }

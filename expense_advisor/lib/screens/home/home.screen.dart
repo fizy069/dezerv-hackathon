@@ -168,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const TravelModeToggle(),
+            const SizedBox(height: 15),
             AccountsSlider(accounts: _accounts),
             const SizedBox(height: 15),
             Container(
