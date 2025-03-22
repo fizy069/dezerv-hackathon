@@ -14,6 +14,7 @@ import 'package:expense_advisor/widgets/currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_advisor/screens/home/widgets/travel_mode_toggle.dart';
 
 String greeting() {
   var hour = DateTime.now().hour;
@@ -166,6 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+            const TravelModeToggle(),
+            const SizedBox(height: 15),
             AccountsSlider(accounts: _accounts),
             const SizedBox(height: 15),
             Container(
