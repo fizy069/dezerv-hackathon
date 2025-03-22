@@ -60,4 +60,27 @@ router.post('/:tripId/transaction', async (req, res) => {
     }
 });
 
+// Get all trips for a user
+router.post('/user-trips', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // First find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Find all trips where the user's ID is in the users array
+        const trips = await Trip.find({ users: user._id })
+            .populate('users', '-passwordHash') // Populate user details except password
+            .populate('transactions.userId', '-passwordHash'); // Populate transaction user details
+
+        res.json(trips);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;
