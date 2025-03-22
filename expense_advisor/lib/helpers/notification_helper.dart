@@ -62,7 +62,7 @@ class NotificationHelper {
     if (await checkOverlayPermission()) {
       await FlutterOverlayWindow.showOverlay(
         enableDrag: true,
-        height: 1000,
+        height: 550,
         width: 400,
         alignment: OverlayAlignment.center,
         flag: OverlayFlag.defaultFlag,

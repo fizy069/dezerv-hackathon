@@ -29,7 +29,7 @@ class OverlayService {
     // Show overlay window
     await FlutterOverlayWindow.showOverlay(
       enableDrag: true,
-      height: 1000,
+      height: 550,
       width: WindowSize.matchParent,
       alignment: OverlayAlignment.center,
       flag: OverlayFlag.defaultFlag,

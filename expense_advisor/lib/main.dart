@@ -44,7 +44,7 @@ Future<void> showTransactionOverlay(
   // Show the overlay without the extras parameter
   await FlutterOverlayWindow.showOverlay(
     enableDrag: true,
-    height: 1000, // Reduce height to fit better
+    height: 550, // Reduce height to fit better
     width: WindowSize.matchParent,
     alignment: OverlayAlignment.center,
     flag: OverlayFlag.defaultFlag,
@@ -62,7 +62,8 @@ onBackgroundMessage(SmsMessage message) async {
       // Check if SMS contains transaction information
       final String body = message.body!.toLowerCase();
       if (body.contains("debit") ||
-          body.contains("credit") ||
+          body.contains("debited") ||
+          body.contains("credited") ||
           body.contains("transaction") ||
           body.contains("payment")) {
         print("Transaction SMS detected");
