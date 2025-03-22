@@ -23,6 +23,12 @@ app.get('/', (req, res) => {
     res.send('API is running');
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// Export the app for Vercel
+module.exports = app;
+
+// Start the server if not in Vercel environment
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+}
