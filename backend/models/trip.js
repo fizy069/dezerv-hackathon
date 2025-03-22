@@ -1,18 +1,18 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-// Trip Schema
-const TripSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
-  transactions: [{
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    amount: { type: Number, required: true },
-    description: { type: String, required: true },
-    date: { type: Date, required: true }
-  }],
-  createdAt: { type: Date, default: Date.now }
-});
+const tripSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    users: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    transactions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Transaction'
+    }]
+}, { timestamps: true });
 
-const Trip = mongoose.model("Trip", TripSchema);
-
-module.exports = Trip;
+module.exports = mongoose.model('Trip', tripSchema);
