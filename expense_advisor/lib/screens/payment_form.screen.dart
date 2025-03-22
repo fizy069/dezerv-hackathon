@@ -23,12 +23,16 @@ class PaymentForm extends StatefulWidget {
   final PaymentType type;
   final Payment? payment;
   final OnCloseCallback? onClose;
+  final bool isTripExpense;
+  final String? tripId;
 
   const PaymentForm({
     super.key,
     required this.type,
     this.payment,
     this.onClose,
+    this.isTripExpense = false,
+    this.tripId,
   });
 
   @override
