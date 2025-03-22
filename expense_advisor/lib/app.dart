@@ -1,7 +1,11 @@
 import 'package:another_telephony/telephony.dart';
 import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
+import 'package:expense_advisor/helpers/notification_helper.dart';
 import 'package:expense_advisor/main.dart';
 import 'package:expense_advisor/screens/main.screen.dart';
+import 'package:expense_advisor/services/overlay_service.dart';
+import 'package:expense_advisor/services/payment_service.dart';
+import 'package:expense_advisor/services/sms_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +26,7 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     initPlatformState();
+    NotificationHelper.initialize();
   }
 
   onMessage(SmsMessage message) async {
@@ -29,16 +34,17 @@ class _AppState extends State<App> {
       _message = message.body ?? "Error reading message body.";
     });
 
-    // Add debug prints to terminal
     print("SMS RECEIVED: $_message");
     print("From: ${message.address}");
     print("Timestamp: ${message.date}");
-  }
 
-  onSendStatus(SendStatus status) {
-    setState(() {
-      _message = status == SendStatus.SENT ? "sent" : "delivered";
-    });
+    if (message.body != null && SMSParser.isPaymentSMS(message.body!)) {
+      // Show the category selection overlay
+      await OverlayService.showCategorySelectionOverlay(
+        message.body!,
+        sender: message.address,
+      );
+    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -50,17 +56,20 @@ class _AppState extends State<App> {
       if (result != null && result) {
         print("SMS permissions granted");
 
+        // Also request overlay permission
+        await NotificationHelper.requestOverlayPermission();
+
         // Register the background handler
         telephony.listenIncomingSms(
           onNewMessage: onMessage,
-          onBackgroundMessage: onBackgroundMessage, // Add this line
-          listenInBackground: true, // Enable background listening
+          onBackgroundMessage: onBackgroundMessage,
+          listenInBackground: true,
         );
       } else {
         print("SMS permissions denied");
       }
     } on PlatformException catch (e) {
-    print("led to get permissions: ${e.message}");
+      print("Failed to get permissions: ${e.message}");
     }
 
     if (!mounted) return;

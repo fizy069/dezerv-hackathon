@@ -9,6 +9,8 @@ class AppState {
   late int? age;
   late double? income;
   late String? email;
+  late bool travelModeActive;
+  late String? activeTripId;
 
   static Future<AppState> getState() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -18,6 +20,9 @@ class AppState {
     int? age = prefs.getInt("age");
     double? income = prefs.getDouble("income");
     String? email = prefs.getString("email");
+    bool travelModeActive = prefs.getBool("travelModeActive") ?? false;
+    String? activeTripId = prefs.getString("activeTripId");
+
     AppState appState = AppState();
     appState.themeColor = themeColor ?? Colors.green.value;
     appState.username = username;
@@ -25,6 +30,8 @@ class AppState {
     appState.age = age;
     appState.income = income;
     appState.email = email;
+    appState.travelModeActive = travelModeActive;
+    appState.activeTripId = activeTripId;
 
     return appState;
   }
@@ -69,6 +76,25 @@ class AppCubit extends Cubit<AppState> {
     emit(await AppState.getState());
   }
 
+  Future<void> toggleTravelMode(bool active, {String? tripId}) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("travelModeActive", active);
+
+    if (active && tripId != null) {
+      await prefs.setString("activeTripId", tripId);
+    } else if (!active) {
+      await prefs.remove("activeTripId");
+    }
+
+    emit(await AppState.getState());
+  }
+
+  Future<void> setActiveTrip(String tripId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("activeTripId", tripId);
+    emit(await AppState.getState());
+  }
+
   Future<void> reset() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove("currency");
@@ -77,6 +103,8 @@ class AppCubit extends Cubit<AppState> {
     await prefs.remove("age");
     await prefs.remove("income");
     await prefs.remove("email");
+    await prefs.remove("travelModeActive");
+    await prefs.remove("activeTripId");
     emit(await AppState.getState());
   }
 }

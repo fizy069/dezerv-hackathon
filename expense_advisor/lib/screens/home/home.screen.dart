@@ -3,10 +3,12 @@ import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
 import 'package:expense_advisor/dao/account_dao.dart';
 import 'package:expense_advisor/dao/payment_dao.dart';
 import 'package:expense_advisor/events.dart';
+import 'package:expense_advisor/main.dart';
 import 'package:expense_advisor/model/account.model.dart';
 import 'package:expense_advisor/model/category.model.dart';
 import 'package:expense_advisor/model/payment.model.dart';
 import 'package:expense_advisor/screens/home/widgets/account_slider.dart';
+import 'package:expense_advisor/screens/home/widgets/expense_chart.dart';
 import 'package:expense_advisor/screens/home/widgets/payment_list_item.dart';
 import 'package:expense_advisor/screens/payment_form.screen.dart';
 import 'package:expense_advisor/theme/colors.dart';
@@ -169,7 +171,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const TravelModeToggle(),
             const SizedBox(height: 15),
+
             AccountsSlider(accounts: _accounts),
+            ElevatedButton(
+              onPressed: () {
+                showTransactionOverlay(
+                  "Test SMS: Your account has been debited INR 500 for a transaction at Store ABC",
+                  "TESTBANK",
+                  500.0,
+                );
+              },
+              child: const Text("---"),
+            ),
+            const SizedBox(height: 15),
+
+            ExpenseChart(dateRange: _range),
             const SizedBox(height: 15),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15),
