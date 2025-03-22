@@ -60,23 +60,91 @@ router.post('/:tripId/transaction', async (req, res) => {
     }
 });
 
-// Get all trips for a user
-router.post('/user-trips', async (req, res) => {
+router.post('/:tripId/balance', async (req, res) => {
+    const { tripId } = req.params;
     const { email } = req.body;
 
     try {
-        // First find the user by email
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        // Find all trips where the user's ID is in the users array
-        const trips = await Trip.find({ users: user._id })
-            .populate('users', '-passwordHash') // Populate user details except password
-            .populate('transactions.userId', '-passwordHash'); // Populate transaction user details
+        // Find trip and populate user details
+        const trip = await Trip.findById(tripId)
+            .populate('users', '-passwordHash')
+            .populate('transactions');
+        
+        if (!trip) {
+            return res.status(404).json({ msg: 'Trip not found' });
+        }
 
-        res.json(trips);
+        // Calculate total spent by each user
+        const userSpends = {};
+        trip.users.forEach(u => {
+            userSpends[u._id.toString()] = 0;
+        });
+
+        // Sum up all transactions
+        trip.transactions.forEach(transaction => {
+            userSpends[transaction.userId.toString()] += transaction.amount;
+        });
+
+        // Calculate total spent in trip
+        const totalSpent = Object.values(userSpends).reduce((sum, amount) => sum + amount, 0);
+        
+        // Calculate equal share per person
+        const equalShare = totalSpent / trip.users.length;
+
+        // Calculate balances
+        const balances = [];
+        trip.users.forEach(otherUser => {
+            if (otherUser._id.toString() !== user._id.toString()) {
+                const otherUserSpent = userSpends[otherUser._id.toString()];
+                const currentUserSpent = userSpends[user._id.toString()];
+                
+                let amount = 0;
+                if (currentUserSpent < equalShare && otherUserSpent > equalShare) {
+                    // Current user needs to pay
+                    amount = Math.min(
+                        equalShare - currentUserSpent,
+                        otherUserSpent - equalShare
+                    );
+                    balances.push({
+                        user: {
+                            _id: otherUser._id,
+                            name: otherUser.name,
+                            email: otherUser.email
+                        },
+                        amount: amount,
+                        type: 'owe'
+                    });
+                } else if (currentUserSpent > equalShare && otherUserSpent < equalShare) {
+                    // Current user needs to receive
+                    amount = Math.min(
+                        currentUserSpent - equalShare,
+                        equalShare - otherUserSpent
+                    );
+                    balances.push({
+                        user: {
+                            _id: otherUser._id,
+                            name: otherUser.name,
+                            email: otherUser.email
+                        },
+                        amount: amount,
+                        type: 'receive'
+                    });
+                }
+            }
+        });
+
+        res.json({
+            totalSpent,
+            equalShare,
+            userSpent: userSpends[user._id.toString()],
+            balances
+        });
+
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
