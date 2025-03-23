@@ -88,7 +88,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                   const Icon(Icons.account_balance_wallet, size: 70),
                   const SizedBox(height: 25),
                   Text(
-                    "Hi! welcome to expense_advisor",
+                    "Hi! welcome to IvyTracker",
                     style: theme.textTheme.headlineMedium!.apply(
                       color: theme.colorScheme.primary,
                       fontWeightDelta: 1,

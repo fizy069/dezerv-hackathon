@@ -61,7 +61,7 @@ class _LandingPageState extends State<LandingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Dezerv",
+                    "IvyTrack",
                     style: theme.textTheme.headlineLarge!.apply(
                       color: theme.colorScheme.primary,
                       fontWeightDelta: 1,
