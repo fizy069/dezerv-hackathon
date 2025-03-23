@@ -16,9 +16,12 @@ router.get('/users', async (req, res) => {
 
 // Create a new trip
 router.post('/create', async (req, res) => {
-    const { name, userIds } = req.body;
+    const { name, emails } = req.body;
 
     try {
+        const users = await User.find({ email: { $in: emails } });
+        const userIds = users.map(user => user._id);
+
         const trip = new Trip({
             name,
             users: userIds
@@ -35,16 +38,21 @@ router.post('/create', async (req, res) => {
 // Add a transaction to a trip
 router.post('/:tripId/transaction', async (req, res) => {
     const { tripId } = req.params;
-    const { userId, amount, description, date } = req.body;
+    const { email, amount, description, date } = req.body;
 
     try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
         const trip = await Trip.findById(tripId);
         if (!trip) {
             return res.status(404).json({ msg: 'Trip not found' });
         }
 
         const transaction = {
-            userId,
+            userId: user._id,
             amount,
             description,
             date
