@@ -51,7 +51,6 @@ class _PaymentForm extends State<PaymentForm> {
   List<Account> _accounts = [];
   List<Category> _categories = [];
 
-  //values
   int? _id;
   String _title = "";
   String _description = "";

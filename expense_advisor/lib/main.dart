@@ -2,20 +2,17 @@ import 'package:another_telephony/telephony.dart';
 import 'package:expense_advisor/app.dart';
 import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
 import 'package:expense_advisor/helpers/db.helper.dart';
-import 'package:expense_advisor/services/payment_service.dart';
 import 'package:expense_advisor/widgets/category_selection_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // Add this import
+import 'dart:convert';
 
-// Global variables to store transaction data for the overlay
 String _currentSmsBody = "No SMS content";
 String? _currentSender;
 double? _currentAmount;
 
-// Add this function to send transaction data to API
 Future<void> sendTransactionToAPI(
   double? amount,
   String category,
@@ -27,9 +24,7 @@ Future<void> sendTransactionToAPI(
 
   try {
     final response = await http.post(
-      Uri.parse(
-        'https://dezerv-hackathon.vercel.app/api/trip/67df875844f7096e14042ffe/transaction',
-      ),
+      Uri.parse(''),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'email': 'test1@example.com',
@@ -52,7 +47,6 @@ Future<void> showTransactionOverlay(
   String? sender,
   double? amount,
 ) async {
-  // Check if permission is granted
   final bool hasPermission = await FlutterOverlayWindow.isPermissionGranted();
   if (!hasPermission) {
     final bool? permissionGranted =
@@ -63,22 +57,19 @@ Future<void> showTransactionOverlay(
     }
   }
 
-  // Store the data globally since we can't pass it directly
   _currentSmsBody = smsBody;
   _currentSender = sender;
   _currentAmount = amount;
 
-  // Close any existing overlay
   if (await FlutterOverlayWindow.isActive()) {
     await FlutterOverlayWindow.closeOverlay();
-    // Add a small delay to ensure proper closing
+
     await Future.delayed(const Duration(milliseconds: 300));
   }
 
-  // Show the overlay without the extras parameter
   await FlutterOverlayWindow.showOverlay(
     enableDrag: true,
-    height: 550, // Reduce height to fit better
+    height: 550,
     width: WindowSize.matchParent,
     alignment: OverlayAlignment.center,
     flag: OverlayFlag.defaultFlag,
@@ -93,7 +84,6 @@ onBackgroundMessage(SmsMessage message) async {
 
   if (message.body != null) {
     try {
-      // Check if SMS contains transaction information
       final String body = message.body!.toLowerCase();
       if (body.contains("debit") ||
           body.contains("debited") ||
@@ -102,7 +92,6 @@ onBackgroundMessage(SmsMessage message) async {
           body.contains("payment")) {
         print("Transaction SMS detected");
 
-        // Extract amount (simple example)
         double? amount;
         final RegExp regExp = RegExp(
           r'(?:rs\.?|inr)\s*(\d+(:?\,\d+)*(:?\.\d+)?)',
@@ -112,16 +101,8 @@ onBackgroundMessage(SmsMessage message) async {
           final amountStr = match.group(1)?.replaceAll(',', '');
           amount = double.tryParse(amountStr ?? '');
           print("Extracted amount: $amount");
-
-          // // Send to API with a default category
-          // await sendTransactionToAPI(
-          //   amount,
-          //   "uncategorized",
-          //   message.body ?? "Transaction",
-          // );
         }
 
-        // Show the overlay with transaction details
         print("Showing transaction overlay from background");
         await showTransactionOverlay(message.body!, message.address, amount);
       }
@@ -160,21 +141,17 @@ void overlayMain() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Remove the registerHandler call as it's not available in your version
-
   await getDBInstance();
   AppState appState = await AppState.getState();
 
   final Telephony telephony = Telephony.instance;
   telephony.listenIncomingSms(
     onNewMessage: (SmsMessage message) async {
-      // Add async here
       print("NEW SMS: ${message.body}");
       print("From: ${message.address}");
 
       if (message.body != null) {
         try {
-          // Check if SMS contains transaction information
           final String body = message.body!.toLowerCase();
           if (body.contains("debit") ||
               body.contains("credit") ||
@@ -182,7 +159,6 @@ void main() async {
               body.contains("payment")) {
             print("Transaction SMS detected in foreground");
 
-            // Extract amount (simple example)
             double? amount;
             final RegExp regExp = RegExp(
               r'(?:rs\.?|inr)\s*(\d+(:?\,\d+)*(:?\.\d+)?)',
@@ -193,7 +169,6 @@ void main() async {
               amount = double.tryParse(amountStr ?? '');
               print("Extracted amount: $amount");
 
-              // Send to API with a default category
               await sendTransactionToAPI(
                 amount,
                 "uncategorized",
@@ -201,7 +176,6 @@ void main() async {
               );
             }
 
-            // Show the overlay with transaction details
             print("Showing transaction overlay from foreground");
             await showTransactionOverlay(
               message.body!,

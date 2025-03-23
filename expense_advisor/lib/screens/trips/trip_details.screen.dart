@@ -1,6 +1,5 @@
 import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
 import 'package:expense_advisor/model/trip.model.dart';
-import 'package:expense_advisor/model/trip_transaction.model.dart';
 import 'package:expense_advisor/model/user.model.dart';
 import 'package:expense_advisor/services/trip_service.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +9,7 @@ import 'package:intl/intl.dart';
 class TripDetailsScreen extends StatefulWidget {
   final Trip trip;
 
-  const TripDetailsScreen({Key? key, required this.trip}) : super(key: key);
+  const TripDetailsScreen({super.key, required this.trip});
 
   @override
   State<TripDetailsScreen> createState() => _TripDetailsScreenState();
@@ -25,10 +24,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
   String _userId = '';
   late TabController _tabController;
 
-  // Map to store who owes whom
   Map<String, Map<String, double>> _settlements = {};
 
-  // Add state variable to track if banner is visible
   bool _isAdVisible = true;
 
   @override
@@ -38,15 +35,13 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
     _tabController = TabController(length: 2, vsync: this);
     _loadUsers();
 
-    // Find current user's ID
     final email =
         context.read<AppCubit>().state.email ??
         context.read<AppCubit>().state.username ??
         'guest@example.com';
 
-    _userId = email; // Temporarily use email as ID until users are loaded
+    _userId = email;
 
-    // Calculate the settlements
     _calculateSettlements();
   }
 
@@ -56,18 +51,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
     super.dispose();
   }
 
-  // Calculate who owes whom
   void _calculateSettlements() {
-    // Clear previous settlements
     _settlements = {};
 
-    // Step 1: Calculate total expenses
     double totalExpenses = _trip.transactions.fold(
       0,
       (sum, transaction) => sum + transaction.amount,
     );
 
-    // Step 2: Calculate per-person expenses
     Map<String, double> paid = {};
     for (var userId in _trip.users) {
       paid[userId] = 0;
@@ -78,18 +69,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
           (paid[transaction.userId] ?? 0) + transaction.amount;
     }
 
-    // Step 3: Calculate equal share per person
     double equalShare = totalExpenses / _trip.users.length;
 
-    // Step 4: Calculate net balance (positive means you're owed money, negative means you owe)
     Map<String, double> balance = {};
     for (var userId in _trip.users) {
       balance[userId] = (paid[userId] ?? 0) - equalShare;
     }
 
-    // Step 5: Determine who pays whom
-    List<String> creditors = []; // People who paid more (positive balance)
-    List<String> debtors = []; // People who paid less (negative balance)
+    List<String> creditors = [];
+    List<String> debtors = [];
 
     for (var entry in balance.entries) {
       if (entry.value > 0) {
@@ -99,7 +87,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
       }
     }
 
-    // Step 6: Calculate settlements
     for (var creditor in creditors) {
       if (!_settlements.containsKey(creditor)) {
         _settlements[creditor] = {};
@@ -114,14 +101,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
         double settlement =
             remainingCredit < debtorOwes ? remainingCredit : debtorOwes;
 
-        // Record the settlement
         _settlements[creditor]![debtor] = settlement;
 
-        // Update remaining balances
         remainingCredit -= settlement;
         balance[debtor] = balance[debtor]! + settlement;
 
-        if (remainingCredit <= 0.01) break; // Account for floating point errors
+        if (remainingCredit <= 0.01) break;
       }
     }
   }
@@ -130,7 +115,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
     try {
       final users = await _tripService.getAllUsers();
 
-      // Find current user
       final email =
           context.read<AppCubit>().state.email ??
           context.read<AppCubit>().state.username;
@@ -165,8 +149,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
       }
     }
 
-    // If not found by ID, try matching by email
-    // This is a fallback since sometimes we just have email addresses
     for (var user in _users) {
       if (user.email == userId) {
         return user.name;
@@ -177,7 +159,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
   }
 
   void _addExpense() async {
-    // Show expense form dialog
     final expenseData = await _showAddExpenseDialog();
 
     if (expenseData != null) {
@@ -277,7 +258,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
         if (trip.id == _trip.id) {
           setState(() {
             _trip = trip;
-            // Recalculate settlements after refreshing trip data
+
             _calculateSettlements();
           });
           break;
@@ -312,7 +293,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
       ),
       body: Column(
         children: [
-          // Add advertisement banner at the top
           _buildAdvertisementBanner(),
           Expanded(
             child:
@@ -321,19 +301,17 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
                     : TabBarView(
                       controller: _tabController,
                       children: [
-                        // Expenses Tab
                         Column(
                           children: [
                             _buildTripSummary(),
                             _buildTransactionsList(),
                           ],
                         ),
-                        // Settlement Tab
+
                         _buildSettlementsView(),
                       ],
                     ),
           ),
-          // Remove the advertisement banner from here
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -345,7 +323,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
   }
 
   Widget _buildAdvertisementBanner() {
-    // If ad is not visible, return an empty container
     if (!_isAdVisible) {
       return const SizedBox.shrink();
     }
@@ -389,7 +366,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
           ),
           TextButton(
             onPressed: () {
-              // Handle ad click
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Advertisement clicked')),
               );
@@ -418,13 +394,11 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
   }
 
   Widget _buildTripSummary() {
-    // Calculate total expenses
     double totalExpenses = _trip.transactions.fold(
       0,
       (sum, transaction) => sum + transaction.amount,
     );
 
-    // Calculate per-person expenses
     Map<String, double> perPersonExpenses = {};
     for (var userId in _trip.users) {
       perPersonExpenses[userId] = 0;
@@ -435,56 +409,79 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
           (perPersonExpenses[transaction.userId] ?? 0) + transaction.amount;
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Trip Summary', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Expenses',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Text(
-                '\$${totalExpenses.toStringAsFixed(2)}',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text('Per Person', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ...perPersonExpenses.entries.map((entry) {
-            bool isCurrentUser = entry.key == _userId;
-            String displayName = _getUserNameById(entry.key);
+    return Card(
+      margin: const EdgeInsets.all(12),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Trip Summary',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Expenses',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  '\$${totalExpenses.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text('Per Person', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 150),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: perPersonExpenses.entries.length,
+                itemBuilder: (context, index) {
+                  final entry = perPersonExpenses.entries.elementAt(index);
+                  bool isCurrentUser = entry.key == _userId;
+                  String displayName = _getUserNameById(entry.key);
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    isCurrentUser ? '$displayName (You)' : displayName,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  Text(
-                    '\$${entry.value.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            isCurrentUser ? '$displayName (You)' : displayName,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '\$${entry.value.toStringAsFixed(2)}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: entry.value > 0 ? Colors.green[700] : null,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            );
-          }).toList(),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -532,18 +529,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
   }
 
   Widget _buildSettlementsView() {
-    // Calculate total expenses
     double totalExpenses = _trip.transactions.fold(
       0,
       (sum, transaction) => sum + transaction.amount,
     );
 
-    // If no expenses, show message
     if (totalExpenses == 0) {
       return const Center(child: Text('No expenses to settle'));
     }
 
-    // Calculate equal share per person
     double equalShare = totalExpenses / _trip.users.length;
 
     return SingleChildScrollView(
@@ -592,18 +586,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
           Text('Settlements', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
 
-          // No settlements case
           if (_settlements.isEmpty)
             const Center(child: Text('Everyone has paid their fair share!')),
 
-          // Settlements list
           ..._buildSettlementList(),
 
           const SizedBox(height: 32),
           const Divider(),
           const SizedBox(height: 16),
 
-          // Explanation text
           Text('How it works:', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           const Text(
@@ -628,7 +619,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
         String debtorName = _getUserNameById(debtorId);
         bool isDebtorCurrentUser = debtorId == _userId;
 
-        // Format the message
         String message;
         if (isCreditorCurrentUser) {
           message = '$debtorName owes you';

@@ -1,5 +1,4 @@
 import 'package:expense_advisor/model/trip_transaction.model.dart';
-import 'package:expense_advisor/model/user.model.dart';
 
 class Trip {
   final String id;
@@ -17,7 +16,6 @@ class Trip {
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
-    // Handle both populated user objects and just user IDs
     List<String> userIds = [];
     if (json['users'] != null) {
       if (json['users'] is List) {
@@ -31,12 +29,10 @@ class Trip {
       }
     }
 
-    // Handle transactions with proper error checking
     List<TripTransaction> transactions = [];
     if (json['transactions'] != null && json['transactions'] is List) {
       for (var t in json['transactions']) {
         if (t is Map<String, dynamic>) {
-          // Check if this is a valid transaction with required fields
           if (t.containsKey('userId') &&
               t.containsKey('amount') &&
               t.containsKey('description')) {
@@ -44,10 +40,8 @@ class Trip {
               transactions.add(TripTransaction.fromJson(t));
             } catch (e) {
               print('Error parsing transaction: $e');
-              // Skip this transaction if there's an error
             }
           } else {
-            // Log malformed transaction for debugging
             print('Skipping malformed transaction: $t');
           }
         }

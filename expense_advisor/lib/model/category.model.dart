@@ -14,7 +14,7 @@ class Category {
     required this.icon,
     required this.color,
     this.budget,
-    this.expense
+    this.expense,
   });
 
   factory Category.fromJson(Map<String, dynamic> data) => Category(

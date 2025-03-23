@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
-class LoadingModal extends StatelessWidget{
+class LoadingModal extends StatelessWidget {
   final Widget content;
-  const LoadingModal({
-    super.key,
-    required this.content,
-  });
+  const LoadingModal({super.key, required this.content});
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -14,21 +11,19 @@ class LoadingModal extends StatelessWidget{
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const CircularProgressIndicator(),
-          const SizedBox(width: 20,),
-          Expanded(child: content)
+          const SizedBox(width: 20),
+          Expanded(child: content),
         ],
-      )
+      ),
     );
   }
 
-  static showLoadingDialog(BuildContext context, {
-    required Widget content,
-  }){
-    showDialog(context: context,
-        builder: (BuildContext context){
-          return LoadingModal(content: content);
-        }
+  static showLoadingDialog(BuildContext context, {required Widget content}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LoadingModal(content: content);
+      },
     );
   }
-
 }

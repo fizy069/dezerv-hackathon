@@ -12,7 +12,6 @@ class TripTransaction {
   });
 
   factory TripTransaction.fromJson(Map<String, dynamic> json) {
-    // Handle both string userId and populated user object
     String userId;
     if (json['userId'] is String) {
       userId = json['userId'];
@@ -24,13 +23,13 @@ class TripTransaction {
 
     return TripTransaction(
       userId: userId,
-      amount: (json['amount'] is int) 
-          ? (json['amount'] as int).toDouble() 
-          : json['amount'].toDouble(),
+      amount:
+          (json['amount'] is int)
+              ? (json['amount'] as int).toDouble()
+              : json['amount'].toDouble(),
       description: json['description'],
-      date: json['date'] != null 
-          ? DateTime.parse(json['date']) 
-          : DateTime.now(),
+      date:
+          json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
     );
   }
 

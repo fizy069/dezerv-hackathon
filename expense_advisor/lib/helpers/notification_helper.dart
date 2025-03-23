@@ -15,9 +15,8 @@ class NotificationHelper {
 
     await _notificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        //welpwelp do this
-      },
+      onDidReceiveNotificationResponse:
+          (NotificationResponse response) async {},
     );
   }
 

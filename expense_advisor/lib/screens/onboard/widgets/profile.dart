@@ -1,5 +1,4 @@
 import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
-import 'package:expense_advisor/helpers/color.helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,25 +51,19 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         return;
       }
 
-      // Update user information
       await cubit.updateUsername(_nameController.text);
 
-      // Save age if provided
       if (_ageController.text.isNotEmpty) {
         await cubit.updateAge(int.parse(_ageController.text));
       }
 
-      // Save income if provided
       if (_incomeController.text.isNotEmpty) {
         await cubit.updateIncome(double.parse(_incomeController.text));
       }
 
-      // Save email if provided
       if (_emailController.text.isNotEmpty) {
         await cubit.updateEmail(_emailController.text);
       }
-
-      // Note: We're not doing anything with the password as requested
 
       widget.onGetStarted();
     }

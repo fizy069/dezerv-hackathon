@@ -38,7 +38,7 @@ class AppState {
 }
 
 class AppCubit extends Cubit<AppState> {
-  AppCubit(AppState initialState) : super(initialState);
+  AppCubit(super.initialState);
 
   Future<void> updateUsername(username) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -16,11 +16,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   final CategoryDao _categoryDao = CategoryDao();
   EventListener? _categoryEventListener;
   List<Category> _categories = [];
+  bool _isLoading = true;
 
   void loadData() async {
+    setState(() => _isLoading = true);
     List<Category> categories = await _categoryDao.find();
     setState(() {
       _categories = categories;
+      _isLoading = false;
     });
   }
 
@@ -38,7 +41,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   void dispose() {
     _categoryEventListener?.cancel();
-
     super.dispose();
   }
 
@@ -46,74 +48,199 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: const Text(
           "Categories",
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: () {},
+            tooltip: 'Sort categories',
+          ),
+        ],
       ),
-      body: ListView.separated(
-        itemCount: _categories.length,
-        itemBuilder: (builder, index) {
-          Category category = _categories[index];
-          double expenseProgress =
-              (category.expense ?? 0) / (category.budget ?? 0);
-          return ListTile(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (builder) => CategoryForm(category: category),
-              );
-            },
-            leading: CircleAvatar(
-              backgroundColor: category.color.withOpacity(0.2),
-              child: Icon(category.icon, color: category.color),
-            ),
-            title: Text(
-              category.name,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.merge(
-                const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
-              ),
-            ),
-            subtitle:
-                expenseProgress.isFinite
-                    ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: expenseProgress,
-                        semanticsLabel: expenseProgress.toString(),
-                      ),
-                    )
-                    : Text(
-                      "No budget",
-                      style: Theme.of(context).textTheme.bodySmall?.apply(
-                        color: Colors.grey,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return Container(
-            width: double.infinity,
-            color: Colors.grey.withAlpha(25),
-            height: 1,
-            margin: const EdgeInsets.only(left: 75, right: 20),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _categories.isEmpty
+              ? _buildEmptyState()
+              : _buildCategoriesList(),
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           showDialog(
             context: context,
             builder: (builder) => const CategoryForm(),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Category'),
+        elevation: 4,
       ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.category_outlined, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'No categories yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add a category to start tracking your expenses',
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (builder) => const CategoryForm(),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Add Your First Category'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoriesList() {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      itemCount: _categories.length,
+      itemBuilder: (builder, index) {
+        Category category = _categories[index];
+
+        double? expenseProgress;
+        bool isOverBudget = false;
+
+        if ((category.budget ?? 0) > 0) {
+          expenseProgress = (category.expense ?? 0) / (category.budget ?? 1);
+          isOverBudget = expenseProgress > 1.0;
+        }
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (builder) => CategoryForm(category: category),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: category.color.withOpacity(0.2),
+                    child: Icon(category.icon, color: category.color, size: 28),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                category.name,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+
+                            if (expenseProgress != null)
+                              Text(
+                                '${(expenseProgress * 100).toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      isOverBudget
+                                          ? Colors.red
+                                          : Colors.green[700],
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (expenseProgress != null) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '₹${category.expense?.toStringAsFixed(0) ?? 0}',
+                                style: TextStyle(
+                                  color:
+                                      isOverBudget
+                                          ? Colors.red
+                                          : Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '₹${category.budget?.toStringAsFixed(0) ?? 0}',
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value:
+                                  expenseProgress > 1.0 ? 1.0 : expenseProgress,
+                              minHeight: 8,
+                              color: isOverBudget ? Colors.red : null,
+                              backgroundColor: Colors.grey[200],
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            "No budget set",
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.apply(color: Colors.grey[600]),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return const SizedBox(height: 4);
+      },
     );
   }
 }

@@ -303,30 +303,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          // ListTile(
-          //   dense: true,
-          //   onTap: () async {
-          //     ConfirmModal.showConfirmDialog(
-          //         context, title: "Are you sure?",
-          //         content: const Text("After deleting data can't be recovered"),
-          //         onConfirm: ()async{
-          //           Navigator.of(context).pop();
-          //           Navigator.of(context).pop();
-          //           await context.read<AppCubit>().reset();
-          //           await resetDatabase();
-          //         },
-          //         onCancel: (){
-          //           Navigator.of(context).pop();
-          //         }
-          //     );
-          //   },
-          //   leading: CircleAvatar(
-          //       backgroundColor: ThemeColors.error.withAlpha(90),
-          //       child: const Icon(Symbols.device_reset,)
-          //   ),
-          //   title:  Text('Reset', style: Theme.of(context).textTheme.bodyMedium?.merge(const TextStyle(fontWeight: FontWeight.w500, fontSize: 15))),
-          //   subtitle:  Text("Delete all the data",style: Theme.of(context).textTheme.bodySmall?.apply(color: Colors.grey, overflow: TextOverflow.ellipsis)),
-          // ),
         ],
       ),
     );

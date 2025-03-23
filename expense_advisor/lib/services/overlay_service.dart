@@ -11,7 +11,6 @@ class OverlayService {
   }) async {
     final amount = SMSParser.extractAmount(smsBody);
 
-    // Show notification first
     await NotificationHelper.showNotification(
       title: 'Payment Detected',
       body:
@@ -20,13 +19,11 @@ class OverlayService {
               : 'New payment detected. Tap to categorize.',
     );
 
-    // Request overlay permission if not granted
     if (!await NotificationHelper.checkOverlayPermission()) {
       final granted = await NotificationHelper.requestOverlayPermission();
       if (!granted) return;
     }
 
-    // Show overlay window
     await FlutterOverlayWindow.showOverlay(
       enableDrag: true,
       height: 550,
@@ -37,14 +34,10 @@ class OverlayService {
       overlayContent: 'Select category for your transaction',
     );
 
-    // Set the overlay content
     FlutterOverlayWindow.overlayListener.listen((event) {
-      if (event == 'overlay_clicked') {
-        // Handle overlay click events if needed
-      }
+      if (event == 'overlay_clicked') {}
     });
 
-    // Add the overlay widget
     runApp(
       MaterialApp(
         debugShowCheckedModeBanner: false,

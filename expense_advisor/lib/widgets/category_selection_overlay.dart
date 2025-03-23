@@ -1,5 +1,4 @@
 import 'package:expense_advisor/main.dart';
-import 'package:expense_advisor/services/payment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
@@ -9,11 +8,11 @@ class CategorySelectionOverlay extends StatefulWidget {
   final double? amount;
 
   const CategorySelectionOverlay({
-    Key? key,
+    super.key,
     required this.smsBody,
     this.sender,
     this.amount,
-  }) : super(key: key);
+  });
 
   @override
   State<CategorySelectionOverlay> createState() =>
@@ -22,25 +21,23 @@ class CategorySelectionOverlay extends StatefulWidget {
 
 class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
   String? selectedCategory;
-  // Reduced to just 6 essential categories to save space
+
   final List<String> categories = ['Food', 'Transport', 'Shopping'];
 
   @override
   Widget build(BuildContext context) {
-    // Get screen dimensions to calculate overlay size
     final screenSize = MediaQuery.of(context).size;
 
     return Material(
-      // Darker semi-transparent background for better contrast
       color: Colors.black.withOpacity(0.7),
       child: Center(
         child: Container(
-          width: screenSize.width * 0.9, // 90% of screen width
-          // Fixed height instead of constraints to avoid overflow
-          height: screenSize.height, // 40% of screen height
+          width: screenSize.width * 0.9,
+
+          height: screenSize.height,
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA), // Slightly off-white background
+            color: const Color(0xFFF8F9FA),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -55,14 +52,13 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF3A86FF), // Vibrant blue header
+                  color: Color(0xFF3A86FF),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -76,7 +72,7 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // White text for contrast
+                        color: Colors.white,
                       ),
                     ),
                     GestureDetector(
@@ -84,14 +80,13 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                       child: const Icon(
                         Icons.close,
                         size: 18,
-                        color: Colors.white, // White icon for contrast
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Amount display
               if (widget.amount != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -100,22 +95,21 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                       const Icon(
                         Icons.currency_rupee,
                         size: 18,
-                        color: Color(0xFF212529), // Dark gray icon
+                        color: Color(0xFF212529),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${widget.amount!.toStringAsFixed(2)}',
+                        widget.amount!.toStringAsFixed(2),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF212529), // Dark gray text
+                          color: Color(0xFF212529),
                         ),
                       ),
                     ],
                   ),
                 ),
 
-              // Category chips - simplified grid layout
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Wrap(
@@ -137,12 +131,8 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                             ),
                           ),
                           selected: isSelected,
-                          selectedColor: const Color(
-                            0xFF3A86FF,
-                          ), // Match header color
-                          backgroundColor: const Color(
-                            0xFFE9ECEF,
-                          ), // Light gray background
+                          selectedColor: const Color(0xFF3A86FF),
+                          backgroundColor: const Color(0xFFE9ECEF),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -158,8 +148,8 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                 ),
               ),
 
-              const Spacer(), // Push buttons to the bottom
-              // Action buttons
+              const Spacer(),
+
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -172,15 +162,13 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          side: const BorderSide(
-                            color: Color(0xFF6C757D),
-                          ), // Medium gray border
+                          side: const BorderSide(color: Color(0xFF6C757D)),
                         ),
                         child: const Text(
                           'Dismiss',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF495057), // Dark gray text
+                            color: Color(0xFF495057),
                           ),
                         ),
                       ),
@@ -192,16 +180,6 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                             selectedCategory == null
                                 ? null
                                 : () async {
-                                  // Optional: Implement the payment processing here
-                                  // final paymentService = PaymentService();
-                                  // await paymentService.processPayment(
-                                  //   widget.smsBody,
-                                  //   recipient: widget.sender,
-                                  //   description: 'Payment categorized as $selectedCategory',
-                                  //   category: selectedCategory,
-                                  // );
-
-                                  // Send to API with a default category
                                   print("Sending transaction to API");
                                   await sendTransactionToAPI(
                                     100,
@@ -209,23 +187,16 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                                     "Shopping",
                                   );
 
-                                  
-
-                                  // Close the overlay after processing
                                   FlutterOverlayWindow.closeOverlay();
                                 },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                            0xFF3A86FF,
-                          ), // Match header color
+                          backgroundColor: const Color(0xFF3A86FF),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          disabledBackgroundColor: const Color(
-                            0xFFADB5BD,
-                          ), // Light gray when disabled
+                          disabledBackgroundColor: const Color(0xFFADB5BD),
                         ),
                         child: const Text(
                           'Save',

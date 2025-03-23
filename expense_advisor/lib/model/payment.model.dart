@@ -39,7 +39,6 @@ class Payment {
     );
   }
 
-  // Updated method to handle API responses with the account model
   factory Payment.fromApiJson(Map<String, dynamic> data) {
     return Payment(
       id: data["id"],
@@ -50,10 +49,7 @@ class Payment {
         name: data["accountName"] ?? "Default Account",
         holderName: data["accountHolderName"] ?? "",
         accountNumber: data["accountNumber"] ?? "",
-        icon: const IconData(
-          0xe332,
-          fontFamily: 'MaterialIcons',
-        ), // Default icon
+        icon: const IconData(0xe332, fontFamily: 'MaterialIcons'),
         color: Color(data["accountColor"] ?? 0xFF000000),
         isDefault: false,
       ),
@@ -80,7 +76,6 @@ class Payment {
     "type": type == PaymentType.credit ? "CR" : "DR",
   };
 
-  // Updated API request method to include all account fields
   Map<String, dynamic> toApiJson() => {
     "id": id,
     "title": title,
@@ -95,6 +90,6 @@ class Payment {
     "amount": amount,
     "date": datetime.toIso8601String(),
     "type": type == PaymentType.credit ? "CR" : "DR",
-    "userId": "", // This should be filled from the app state
+    "userId": "",
   };
 }

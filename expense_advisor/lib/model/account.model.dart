@@ -22,19 +22,17 @@ class Account {
     this.isDefault,
     this.income,
     this.expense,
-    this.balance
+    this.balance,
   });
-
-
 
   factory Account.fromJson(Map<String, dynamic> data) => Account(
     id: data["id"],
     name: data["name"],
-    holderName: data["holderName"] ??"",
-    accountNumber: data["accountNumber"]??"",
+    holderName: data["holderName"] ?? "",
+    accountNumber: data["accountNumber"] ?? "",
     icon: IconData(data["icon"], fontFamily: 'MaterialIcons'),
     color: Color(data["color"]),
-    isDefault: data["isDefault"]==1?true:false,
+    isDefault: data["isDefault"] == 1 ? true : false,
     income: data["income"],
     expense: data["expense"],
     balance: data["balance"],
@@ -47,6 +45,6 @@ class Account {
     "accountNumber": accountNumber,
     "icon": icon.codePoint,
     "color": color.value,
-    "isDefault": (isDefault??false) ? 1:0
+    "isDefault": (isDefault ?? false) ? 1 : 0,
   };
 }

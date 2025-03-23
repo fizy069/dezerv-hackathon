@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:expense_advisor/theme/colors.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 
 class ExpenseChart extends StatelessWidget {
   final DateTimeRange dateRange;
 
-  const ExpenseChart({Key? key, required this.dateRange}) : super(key: key);
+  const ExpenseChart({super.key, required this.dateRange});
 
   @override
   Widget build(BuildContext context) {
@@ -134,13 +133,11 @@ class ExpenseChart extends StatelessWidget {
       color: Colors.grey,
     );
 
-    // Simple day labels
     final labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final int index = value.toInt();
 
     if (index >= 0 && index < labels.length) {
       return SideTitleWidget(
-        // axisSide: meta.axisSide,
         meta: meta,
         child: Text(labels[index], style: style),
       );
@@ -170,10 +167,6 @@ class ExpenseChart extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return SideTitleWidget(
-      // axisSide: meta.axisSide,
-      meta: meta,
-      child: Text(text, style: style),
-    );
+    return SideTitleWidget(meta: meta, child: Text(text, style: style));
   }
 }

@@ -1,5 +1,4 @@
 import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
-import 'package:expense_advisor/screens/accounts/accounts.screen.dart';
 import 'package:expense_advisor/screens/categories/categories.screen.dart';
 import 'package:expense_advisor/screens/chatbot/chatbot_webview.screen.dart';
 import 'package:expense_advisor/screens/home/home.screen.dart';
@@ -38,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
             physics: const NeverScrollableScrollPhysics(),
             children: const [
               HomeScreen(),
-              // AccountsScreen(),
+
               ChatbotWebViewScreen(),
               CategoriesScreen(),
               SettingsScreen(),

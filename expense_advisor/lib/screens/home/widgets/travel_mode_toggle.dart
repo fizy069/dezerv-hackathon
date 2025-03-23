@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TravelModeToggle extends StatelessWidget {
-  const TravelModeToggle({Key? key}) : super(key: key);
+  const TravelModeToggle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -117,23 +117,18 @@ class TravelModeToggle extends StatelessWidget {
         appCubit.state.email ?? appCubit.state.username ?? 'guest@example.com';
 
     if (value) {
-      // Turning on travel mode
       final tripService = TripService();
       final trips = await tripService.getUserTrips(email);
 
       if (trips.isEmpty) {
-        // No existing trips, ask to create one
         appCubit.toggleTravelMode(value);
         _createNewTrip(context);
       } else if (trips.length == 1) {
-        // Only one trip, automatically select it
         appCubit.toggleTravelMode(value, tripId: trips.first.id);
       } else {
-        // Multiple trips, show dialog to select one
         _showTripSelectionDialog(context, trips);
       }
     } else {
-      // Turning off travel mode
       appCubit.toggleTravelMode(value);
     }
   }

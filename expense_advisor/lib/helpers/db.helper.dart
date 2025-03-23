@@ -70,7 +70,6 @@ Future<void> resetDatabase() async {
     "isDefault": 1,
   });
 
-  //prefill all categories
   List<Map<String, dynamic>> categories = [
     {"name": "Housing", "icon": Icons.house.codePoint},
     {"name": "Transportation", "icon": Icons.emoji_transportation.codePoint},
@@ -102,15 +101,12 @@ Future<void> resetDatabase() async {
 }
 
 Future<String> getExternalDocumentPath() async {
-  // To check whether permission is given for this app or not.
   var status = await Permission.storage.status;
   if (!status.isGranted) {
-    // If not we will ask for permission first
     await Permission.storage.request();
   }
   Directory directory = Directory("");
   if (Platform.isAndroid) {
-    // Redirects it to download folder in android
     directory = Directory("/storage/emulated/0/Download");
   } else {
     directory = await getApplicationDocumentsDirectory();

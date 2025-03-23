@@ -4,12 +4,10 @@ import 'package:expense_advisor/helpers/notification_helper.dart';
 import 'package:expense_advisor/main.dart';
 import 'package:expense_advisor/screens/main.screen.dart';
 import 'package:expense_advisor/services/overlay_service.dart';
-import 'package:expense_advisor/services/payment_service.dart';
 import 'package:expense_advisor/services/sms_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -39,7 +37,6 @@ class _AppState extends State<App> {
     print("Timestamp: ${message.date}");
 
     if (message.body != null && SMSParser.isPaymentSMS(message.body!)) {
-      // Show the category selection overlay
       await OverlayService.showCategorySelectionOverlay(
         message.body!,
         sender: message.address,
@@ -47,19 +44,15 @@ class _AppState extends State<App> {
     }
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       final bool? result = await telephony.requestPhoneAndSmsPermissions;
 
       if (result != null && result) {
         print("SMS permissions granted");
 
-        // Also request overlay permission
         await NotificationHelper.requestOverlayPermission();
 
-        // Register the background handler
         telephony.listenIncomingSms(
           onNewMessage: onMessage,
           onBackgroundMessage: onBackgroundMessage,
@@ -86,6 +79,7 @@ class _AppState extends State<App> {
     return BlocBuilder<AppCubit, AppState>(
       builder: (context, state) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'Dezerv',
           theme: ThemeData(
             useMaterial3: true,
@@ -108,10 +102,6 @@ class _AppState extends State<App> {
             ),
           ),
           home: const MainScreen(),
-          // localizationsDelegates:  [
-          //   GlobalWidgetsLocalizations.delegate,
-          //   GlobalMaterialLocalizations.delegate,
-          // ],
         );
       },
     );

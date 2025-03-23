@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:expense_advisor/model/payment.model.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
 
 class TransactionApiService {
-  final String baseUrl =
-      'https://your-api-url.com'; // Replace with your actual API URL
+  final String baseUrl = '';
 
   Future<List<Payment>> getTransactions(String userId) async {
     try {

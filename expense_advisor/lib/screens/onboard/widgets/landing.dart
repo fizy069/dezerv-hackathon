@@ -2,7 +2,6 @@ import 'package:expense_advisor/helpers/color.helper.dart';
 import 'package:expense_advisor/widgets/buttons/button.dart';
 import 'package:expense_advisor/bloc/cubit/app_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LandingPage extends StatefulWidget {
@@ -28,18 +27,15 @@ class _LandingPageState extends State<LandingPage> {
   void _saveUserData() {
     if (_formKey.currentState!.validate()) {
       final appCubit = context.read<AppCubit>();
-      
-      // Save age if provided
+
       if (_ageController.text.isNotEmpty) {
         appCubit.updateAge(int.parse(_ageController.text));
       }
-      
-      // Save income if provided
+
       if (_incomeController.text.isNotEmpty) {
         appCubit.updateIncome(double.parse(_incomeController.text));
       }
-      
-      // Continue to next screen
+
       widget.onGetStarted();
     }
   }
@@ -52,8 +48,9 @@ class _LandingPageState extends State<LandingPage> {
         child: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
-            height: MediaQuery.of(context).size.height - 
-                MediaQuery.of(context).padding.top - 
+            height:
+                MediaQuery.of(context).size.height -
+                MediaQuery.of(context).padding.top -
                 MediaQuery.of(context).padding.bottom,
             child: Form(
               key: _formKey,
@@ -71,14 +68,20 @@ class _LandingPageState extends State<LandingPage> {
                   Text(
                     "Easy method to manage your savings",
                     style: theme.textTheme.headlineMedium!.apply(
-                      color: ColorHelper.lighten(theme.colorScheme.primary, 0.1),
+                      color: ColorHelper.lighten(
+                        theme.colorScheme.primary,
+                        0.1,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Icon(Icons.check_circle, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 15),
                       const Expanded(
                         child: Text("Using our app, manage your finances."),
@@ -89,7 +92,10 @@ class _LandingPageState extends State<LandingPage> {
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Icon(Icons.check_circle, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 15),
                       const Expanded(
                         child: Text(
@@ -102,7 +108,10 @@ class _LandingPageState extends State<LandingPage> {
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Icon(Icons.check_circle, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 15),
                       const Expanded(
                         child: Text(
@@ -111,55 +120,7 @@ class _LandingPageState extends State<LandingPage> {
                       ),
                     ],
                   ),
-                  // const SizedBox(height: 30),
-                  // Text(
-                  //   "Tell us about yourself",
-                  //   style: theme.textTheme.titleMedium!.copyWith(
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 15),
-                  // TextFormField(
-                  //   controller: _ageController,
-                  //   decoration: const InputDecoration(
-                  //     labelText: 'Your Age',
-                  //     border: OutlineInputBorder(),
-                  //     prefixIcon: Icon(Icons.person),
-                  //   ),
-                  //   keyboardType: TextInputType.number,
-                  //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  //   validator: (value) {
-                  //     if (value != null && value.isNotEmpty) {
-                  //       final age = int.tryParse(value);
-                  //       if (age == null || age < 18 || age > 100) {
-                  //         return 'Please enter a valid age between 18-100';
-                  //       }
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
-                  // const SizedBox(height: 15),
-                  // TextFormField(
-                  //   controller: _incomeController,
-                  //   decoration: const InputDecoration(
-                  //     labelText: 'Monthly Income',
-                  //     border: OutlineInputBorder(),
-                  //     prefixIcon: Icon(Icons.currency_rupee),
-                  //   ),
-                  //   keyboardType: TextInputType.number,
-                  //   inputFormatters: [
-                  //     FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                  //   ],
-                  //   validator: (value) {
-                  //     if (value != null && value.isNotEmpty) {
-                  //       final income = double.tryParse(value);
-                  //       if (income == null || income <= 0) {
-                  //         return 'Please enter a valid income amount';
-                  //       }
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
+
                   const Expanded(child: SizedBox()),
                   Container(
                     alignment: Alignment.bottomRight,

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CreateTripScreen extends StatefulWidget {
-  const CreateTripScreen({Key? key}) : super(key: key);
+  const CreateTripScreen({super.key});
 
   @override
   State<CreateTripScreen> createState() => _CreateTripScreenState();
@@ -37,7 +37,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
       debugPrint('Loaded ${users.length} users');
 
-      // Check if we received any users and log them
       if (users.isNotEmpty) {
         for (var user in users) {
           debugPrint('User: ${user.name} (${user.email}), ID: ${user.id}');
@@ -51,7 +50,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           _availableUsers.clear();
           _availableUsers.addAll(users);
 
-          // Find current user by email
           final currentUserEmail =
               context.read<AppCubit>().state.email ??
               context.read<AppCubit>().state.username;
@@ -69,7 +67,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
             }
           }
 
-          // If no current user was found, add the first user as default
           if (_currentUserId == null && users.isNotEmpty) {
             _currentUserId = users.first.id;
             _participantIds.add(users.first.id);
@@ -107,7 +104,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   }
 
   void _removeParticipant(String userId) {
-    // Don't allow removing the current user
     if (userId != _currentUserId) {
       setState(() {
         _participantIds.remove(userId);
@@ -146,7 +142,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
 
         debugPrint('Creating trip with name: ${_nameController.text}');
 
-        // Convert user IDs to emails for the API request
         final List<String> participantEmails =
             _participantIds.map((userId) {
               return _getUserEmailById(userId);
@@ -158,18 +153,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         final tripService = TripService();
         final trip = await tripService.createTrip(
           _nameController.text,
-          participantEmails, // Send emails instead of IDs
+          participantEmails,
         );
 
-        if (trip != null) {
-          // Set this trip as active in travel mode
-          context.read<AppCubit>().toggleTravelMode(true, tripId: trip.id);
+        context.read<AppCubit>().toggleTravelMode(true, tripId: trip.id);
 
-          if (mounted) {
-            Navigator.of(context).pop(true);
-          }
-        } else {
-          throw Exception('Failed to create trip - received null response');
+        if (mounted) {
+          Navigator.of(context).pop(true);
         }
       } catch (e) {
         debugPrint('Error creating trip: $e');
@@ -203,7 +193,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           title: const Text('Select Participants'),
           content: SizedBox(
             width: double.maxFinite,
-            height: 300, // Set a fixed height
+            height: 300,
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: _availableUsers.length,
@@ -216,7 +206,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                   title: Text(user.name),
                   subtitle: Text(user.email),
                   value: isSelected,
-                  enabled: !isCurrentUser, // Disable for current user
+                  enabled: !isCurrentUser,
                   onChanged:
                       isCurrentUser
                           ? null
@@ -227,7 +217,7 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                               _removeParticipant(user.id);
                             }
                             Navigator.pop(context);
-                            _showUserSelectionDialog(); // Reopen with updated selection
+                            _showUserSelectionDialog();
                           },
                 );
               },

@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:expense_advisor/model/trip.model.dart';
 import 'package:expense_advisor/model/user.model.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class TripService {
-  final String baseUrl = 'http://10.70.109.97:3000';
+  final String baseUrl = '';
 
-  // Get all users
   Future<List<User>> getAllUsers() async {
     print('Fetching all users');
     try {
@@ -32,7 +30,6 @@ class TripService {
     }
   }
 
-  // Get all trips for a user by email
   Future<List<Trip>> getUserTrips(String email) async {
     print('Fetching trips for user email: $email');
     try {
@@ -54,11 +51,10 @@ class TripService {
       }
     } catch (e) {
       print('Error in getUserTrips: $e');
-      return []; // Return empty list on error
+      return [];
     }
   }
 
-  // Create a new trip
   Future<Trip> createTrip(String name, List<String> userIds) async {
     print('Creating trip: name=$name, users=$userIds');
     try {
@@ -81,10 +77,9 @@ class TripService {
     }
   }
 
-  // Add a transaction to a trip
   Future<bool> addTripTransaction(
     String tripId,
-    String userEmail, // Renamed parameter to be more explicit
+    String userEmail,
     double amount,
     String description,
   ) async {
@@ -96,7 +91,7 @@ class TripService {
         Uri.parse('$baseUrl/api/trip/$tripId/transaction'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'email': userEmail, // This is clearly an email now
+          'email': userEmail,
           'amount': amount,
           'description': description,
           'date': DateTime.now().toIso8601String(),
@@ -112,15 +107,12 @@ class TripService {
     }
   }
 
-  // Get active trip (we'll use user-trips and just return the latest one if needed)
   Future<Trip?> getActiveTrip(String email, String tripId) async {
     print('Fetching active trip for user: $email with tripId: $tripId');
     try {
-      // Get all user trips
       final trips = await getUserTrips(email);
       print('User trips: $trips');
 
-      // Find the trip matching the active trip ID
       for (var trip in trips) {
         if (trip.id == tripId) {
           return trip;

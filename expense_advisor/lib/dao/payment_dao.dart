@@ -29,22 +29,18 @@ class PaymentDao {
           "AND datetime BETWEEN DATE('${DateFormat('yyyy-MM-dd kk:mm:ss').format(range.start)}') AND DATE('${DateFormat('yyyy-MM-dd kk:mm:ss').format(range.end.add(const Duration(days: 1)))}')";
     }
 
-    //type check
     if (type != null) {
       where += "AND type='${type == PaymentType.credit ? "DR" : "CR"}' ";
     }
 
-    //icon check
     if (account != null) {
       where += "AND account='${account.id}' ";
     }
 
-    //icon check
     if (category != null) {
       where += "AND category='${category.id}' ";
     }
 
-    //categories
     List<Category> categories = await CategoryDao().find();
     List<Account> accounts = await AccountDao().find();
 
