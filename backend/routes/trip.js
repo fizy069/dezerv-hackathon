@@ -70,7 +70,7 @@ router.post('/:tripId/transaction', async (req, res) => {
 });
 
 // Get all trips for a user by email
-router.get('/user-trips', async (req, res) => {
+router.post('/user-trips', async (req, res) => {
     const { email } = req.body;
 
     try {
