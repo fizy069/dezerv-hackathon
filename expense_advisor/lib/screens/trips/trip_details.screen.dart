@@ -28,6 +28,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
   // Map to store who owes whom
   Map<String, Map<String, double>> _settlements = {};
 
+  // Add state variable to track if banner is visible
+  bool _isAdVisible = true;
+
   @override
   void initState() {
     super.initState();
@@ -190,7 +193,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
 
         final success = await _tripService.addTripTransaction(
           _trip.id,
-          email, 
+          email,
           expenseData['amount'],
           expenseData['description'],
         );
@@ -307,24 +310,109 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
           tabs: const [Tab(text: 'Expenses'), Tab(text: 'Settlement')],
         ),
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : TabBarView(
-                controller: _tabController,
-                children: [
-                  // Expenses Tab
-                  Column(
-                    children: [_buildTripSummary(), _buildTransactionsList()],
-                  ),
-                  // Settlement Tab
-                  _buildSettlementsView(),
-                ],
-              ),
+      body: Column(
+        children: [
+          // Add advertisement banner at the top
+          _buildAdvertisementBanner(),
+          Expanded(
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Expenses Tab
+                        Column(
+                          children: [
+                            _buildTripSummary(),
+                            _buildTransactionsList(),
+                          ],
+                        ),
+                        // Settlement Tab
+                        _buildSettlementsView(),
+                      ],
+                    ),
+          ),
+          // Remove the advertisement banner from here
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addExpense,
         icon: const Icon(Icons.add),
         label: const Text('Add Expense'),
+      ),
+    );
+  }
+
+  Widget _buildAdvertisementBanner() {
+    // If ad is not visible, return an empty container
+    if (!_isAdVisible) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      height: 60,
+      width: double.infinity,
+      color: Colors.grey[200],
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(Icons.credit_card, color: Colors.white, size: 18),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Travel Smart with ExpenseCard',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'No foreign transaction fees & 2% cashback',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // Handle ad click
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Advertisement clicked')),
+              );
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(60, 28),
+            ),
+            child: const Text('Learn More', style: TextStyle(fontSize: 12)),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 16),
+            padding: const EdgeInsets.all(4),
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              setState(() {
+                _isAdVisible = false;
+              });
+            },
+          ),
+        ],
       ),
     );
   }

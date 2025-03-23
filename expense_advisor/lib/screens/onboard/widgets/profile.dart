@@ -17,7 +17,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _incomeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     _ageController.dispose();
     _incomeController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -67,55 +70,66 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         await cubit.updateEmail(_emailController.text);
       }
 
+      // Note: We're not doing anything with the password as requested
+
       widget.onGetStarted();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 25),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.account_balance_wallet, size: 70),
-                  const SizedBox(height: 25),
-                  Text(
-                    "Hi! welcome to IvyTracker",
-                    style: theme.textTheme.headlineMedium!.apply(
-                      color: theme.colorScheme.primary,
-                      fontWeightDelta: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Text(
-                    "Tell us about yourself",
-                    style: theme.textTheme.bodyLarge!.apply(
-                      color: ColorHelper.darken(
-                        theme.textTheme.bodyLarge!.color!,
+                  const SizedBox(height: 30),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      fontWeightDelta: 1,
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 60,
+                        color: Colors.blue.shade700,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 25),
-                  TextFormField(
+                  const SizedBox(height: 30),
+                  Center(
+                    child: Text(
+                      "Create your account",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      "Join IvyTracker to manage your expenses",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  _buildTextField(
                     controller: _nameController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      prefixIcon: const Icon(Icons.account_circle),
-                      hintText: "Enter your name",
-                      label: const Text("Name"),
-                    ),
+                    label: "Full Name",
+                    hint: "Enter your full name",
+                    icon: Icons.person_outline,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your name';
@@ -123,18 +137,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
-                  TextFormField(
+                  const SizedBox(height: 16),
+                  _buildTextField(
                     controller: _emailController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      prefixIcon: const Icon(Icons.email),
-                      hintText: "Enter your email address",
-                      label: const Text("Email"),
-                    ),
+                    label: "Email Address",
+                    hint: "Enter your email address",
+                    icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
@@ -148,18 +156,14 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
-                  TextFormField(
+                  const SizedBox(height: 16),
+                  _buildPasswordField(),
+                  const SizedBox(height: 16),
+                  _buildTextField(
                     controller: _ageController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      prefixIcon: const Icon(Icons.calendar_today),
-                      hintText: "Enter your age",
-                      label: const Text("Age"),
-                    ),
+                    label: "Age",
+                    hint: "Enter your age",
+                    icon: Icons.cake_outlined,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     validator: (value) {
@@ -172,18 +176,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
-                  TextFormField(
+                  const SizedBox(height: 16),
+                  _buildTextField(
                     controller: _incomeController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      prefixIcon: const Icon(Icons.currency_rupee),
-                      hintText: "Enter your monthly income",
-                      label: const Text("Monthly Income"),
-                    ),
+                    label: "Monthly Income",
+                    hint: "Enter your monthly income",
+                    icon: Icons.currency_rupee,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
@@ -200,20 +198,146 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       return null;
                     },
                   ),
+                  const SizedBox(height: 40),
+                  _buildSignUpButton(),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {},
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Already have an account? ",
+                          style: TextStyle(color: Colors.grey.shade600),
+                          children: [
+                            TextSpan(
+                              text: "Sign in",
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon, color: Colors.blue.shade700),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.red.shade300),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      validator: validator,
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextFormField(
+      controller: _passwordController,
+      obscureText: _obscurePassword,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        labelText: "Password",
+        hintText: "Create a password",
+        prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade700),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey.shade600,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.red.shade300),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+      validator: (value) {
+        if (value != null && value.isNotEmpty && value.length < 6) {
+          return 'Password must be at least 6 characters';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildSignUpButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
         onPressed: _saveUserData,
-        label: const Row(
-          children: <Widget>[
-            Text("Next"),
-            SizedBox(width: 10),
-            Icon(Icons.arrow_forward),
-          ],
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue.shade700,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          shadowColor: Colors.blue.withOpacity(0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Text(
+          "Sign Up",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );

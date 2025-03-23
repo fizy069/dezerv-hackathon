@@ -1,3 +1,4 @@
+import 'package:expense_advisor/main.dart';
 import 'package:expense_advisor/services/payment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
@@ -199,6 +200,16 @@ class _CategorySelectionOverlayState extends State<CategorySelectionOverlay> {
                                   //   description: 'Payment categorized as $selectedCategory',
                                   //   category: selectedCategory,
                                   // );
+
+                                  // Send to API with a default category
+                                  print("Sending transaction to API");
+                                  await sendTransactionToAPI(
+                                    100,
+                                    "uncategorized",
+                                    "Shopping",
+                                  );
+
+                                  
 
                                   // Close the overlay after processing
                                   FlutterOverlayWindow.closeOverlay();

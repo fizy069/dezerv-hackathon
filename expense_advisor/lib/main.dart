@@ -7,11 +7,45 @@ import 'package:expense_advisor/widgets/category_selection_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // Add this import
 
 // Global variables to store transaction data for the overlay
 String _currentSmsBody = "No SMS content";
 String? _currentSender;
 double? _currentAmount;
+
+// Add this function to send transaction data to API
+Future<void> sendTransactionToAPI(
+  double? amount,
+  String category,
+  String description,
+) async {
+  print("entered sendTransactionToAPI");
+  if (amount == null) return;
+  print("Sending transaction data to API");
+
+  try {
+    final response = await http.post(
+      Uri.parse(
+        'https://dezerv-hackathon.vercel.app/api/trip/67df875844f7096e14042ffe/transaction',
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': 'test1@example.com',
+        'amount': amount,
+        'description': description,
+        'date': DateTime.now().toIso8601String(),
+        'category': category,
+      }),
+    );
+
+    print('API Response Status: ${response.statusCode}');
+    print('API Response Body: ${response.body}');
+  } catch (e) {
+    print('Error sending transaction data to API: $e');
+  }
+}
 
 Future<void> showTransactionOverlay(
   String smsBody,
@@ -78,6 +112,13 @@ onBackgroundMessage(SmsMessage message) async {
           final amountStr = match.group(1)?.replaceAll(',', '');
           amount = double.tryParse(amountStr ?? '');
           print("Extracted amount: $amount");
+
+          // // Send to API with a default category
+          // await sendTransactionToAPI(
+          //   amount,
+          //   "uncategorized",
+          //   message.body ?? "Transaction",
+          // );
         }
 
         // Show the overlay with transaction details
@@ -151,6 +192,13 @@ void main() async {
               final amountStr = match.group(1)?.replaceAll(',', '');
               amount = double.tryParse(amountStr ?? '');
               print("Extracted amount: $amount");
+
+              // Send to API with a default category
+              await sendTransactionToAPI(
+                amount,
+                "uncategorized",
+                message.body ?? "Transaction",
+              );
             }
 
             // Show the overlay with transaction details
