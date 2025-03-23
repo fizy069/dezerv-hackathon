@@ -43,7 +43,9 @@ class TripService {
       );
 
       print('Get user trips response status: ${response.statusCode}');
-      print('Get user trips response body: ${response.body} for user email: $email');
+      print(
+        'Get user trips response body: ${response.body} for user email: $email',
+      );
       if (response.statusCode == 200) {
         List<dynamic> tripsJson = json.decode(response.body);
         return tripsJson.map((json) => Trip.fromJson(json)).toList();
@@ -63,7 +65,7 @@ class TripService {
       final response = await http.post(
         Uri.parse('$baseUrl/api/trip/create'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'name': name, 'userIds': userIds}),
+        body: json.encode({'name': name, 'emails': userIds}),
       );
 
       print('Create trip response status: ${response.statusCode}');
@@ -82,19 +84,19 @@ class TripService {
   // Add a transaction to a trip
   Future<bool> addTripTransaction(
     String tripId,
-    String userId,
+    String userEmail, // Renamed parameter to be more explicit
     double amount,
     String description,
   ) async {
     print(
-      'Adding transaction: tripId=$tripId, userId=$userId, amount=$amount, description=$description',
+      'Adding transaction: tripId=$tripId, userEmail=$userEmail, amount=$amount, description=$description',
     );
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/trip/$tripId/transaction'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'userId': userId,
+          'email': userEmail, // This is clearly an email now
           'amount': amount,
           'description': description,
           'date': DateTime.now().toIso8601String(),
@@ -102,6 +104,7 @@ class TripService {
       );
 
       print('Add transaction response status: ${response.statusCode}');
+      print('Add transaction response body: ${response.body}');
       return response.statusCode == 200;
     } catch (e) {
       print('Error in addTripTransaction: $e');
@@ -115,6 +118,7 @@ class TripService {
     try {
       // Get all user trips
       final trips = await getUserTrips(email);
+      print('User trips: $trips');
 
       // Find the trip matching the active trip ID
       for (var trip in trips) {

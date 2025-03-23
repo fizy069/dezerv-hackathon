@@ -183,9 +183,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen>
       });
 
       try {
+        final email =
+            context.read<AppCubit>().state.email ??
+            context.read<AppCubit>().state.username ??
+            'guest@example.com';
+
         final success = await _tripService.addTripTransaction(
           _trip.id,
-          _userId,
+          email, 
           expenseData['amount'],
           expenseData['description'],
         );

@@ -4,7 +4,7 @@ import 'package:expense_advisor/model/user.model.dart';
 class Trip {
   final String id;
   final String name;
-  final List<String> users; // User IDs
+  final List<String> users;
   final List<TripTransaction> transactions;
   final DateTime createdAt;
 
@@ -25,22 +25,40 @@ class Trip {
           if (user is String) {
             userIds.add(user);
           } else if (user is Map<String, dynamic>) {
-            userIds.add(user['_id']);
+            userIds.add(user['_id'] ?? '');
+          }
+        }
+      }
+    }
+
+    // Handle transactions with proper error checking
+    List<TripTransaction> transactions = [];
+    if (json['transactions'] != null && json['transactions'] is List) {
+      for (var t in json['transactions']) {
+        if (t is Map<String, dynamic>) {
+          // Check if this is a valid transaction with required fields
+          if (t.containsKey('userId') &&
+              t.containsKey('amount') &&
+              t.containsKey('description')) {
+            try {
+              transactions.add(TripTransaction.fromJson(t));
+            } catch (e) {
+              print('Error parsing transaction: $e');
+              // Skip this transaction if there's an error
+            }
+          } else {
+            // Log malformed transaction for debugging
+            print('Skipping malformed transaction: $t');
           }
         }
       }
     }
 
     return Trip(
-      id: json['_id'],
-      name: json['name'],
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
       users: userIds,
-      transactions:
-          json['transactions'] != null
-              ? List<TripTransaction>.from(
-                json['transactions'].map((t) => TripTransaction.fromJson(t)),
-              )
-              : [],
+      transactions: transactions,
       createdAt:
           json['createdAt'] != null
               ? DateTime.parse(json['createdAt'])
