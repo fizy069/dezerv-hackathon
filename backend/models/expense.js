@@ -4,13 +4,17 @@ const mongoose = require("mongoose");
 const ExpenseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   amount: { type: Number, required: true },
-  category: { type: String, required: true }, // e.g., Food, Travel, Shopping
+  category: { type: String, required: true },
   description: { type: String },
-  paymentMethod: { type: String }, // e.g., UPI, Debit Card, Net Banking
-  transactionId: { type: String, unique: true }, // Extracted from SMS
-  bankName: { type: String }, // Extracted from SMS
-  date: { type: Date, required: true },
-  smsContent: { type: String }, // Raw SMS message for debugging
+  paymentMethod: { type: String },
+  transactionId: { type: String, unique: true },
+  bankName: { type: String }, 
+  
+  date: {
+    type: Date,
+    default: Date.now()
+  },
+  
   createdAt: { type: Date, default: Date.now }
 });
 

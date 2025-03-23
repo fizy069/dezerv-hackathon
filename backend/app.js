@@ -3,10 +3,11 @@ const connectDB = require('./config/db');
 require('dotenv').config();
 
 const app = express();
-const PORT = 8001; // Change the port number here
+const PORT = process.env.PORT || 3001;
 
 const authRoutes = require('./routes/auth');
 const tripRoutes = require('./routes/trip');
+const transactionRoutes = require('./routes/transactions'); // Import the transaction routes
 
 // Middleware
 app.use(express.json());
@@ -17,6 +18,7 @@ connectDB();
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/trip', tripRoutes);
+app.use('/api/transactions', transactionRoutes); // Use the transaction routes
 
 // Basic route
 app.get('/', (req, res) => {

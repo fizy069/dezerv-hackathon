@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Trip = require('../models/trip');
 const User = require('../models/user');
-const Transaction = require('../models/transaction'); // Import the Transaction model
+const Transaction = require('../models/transaction'); 
 
 // Get list of all users
 router.get('/users', async (req, res) => {
