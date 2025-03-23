@@ -145,12 +145,20 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
         }
 
         debugPrint('Creating trip with name: ${_nameController.text}');
-        debugPrint('Participants: $_participantIds');
+
+        // Convert user IDs to emails for the API request
+        final List<String> participantEmails =
+            _participantIds.map((userId) {
+              return _getUserEmailById(userId);
+            }).toList();
+
+        debugPrint('Participants (IDs): $_participantIds');
+        debugPrint('Participants (Emails): $participantEmails');
 
         final tripService = TripService();
         final trip = await tripService.createTrip(
           _nameController.text,
-          _participantIds,
+          participantEmails, // Send emails instead of IDs
         );
 
         if (trip != null) {
