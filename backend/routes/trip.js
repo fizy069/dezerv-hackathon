@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Trip = require('../models/trip');
 const User = require('../models/user');
+const Transaction = require('../models/transaction'); // Import the Transaction model
 
 // Get list of all users
 router.get('/users', async (req, res) => {
@@ -16,9 +17,12 @@ router.get('/users', async (req, res) => {
 
 // Create a new trip
 router.post('/create', async (req, res) => {
-    const { name, userIds } = req.body;
+    const { name, emails } = req.body;
 
     try {
+        const users = await User.find({ email: { $in: emails } });
+        const userIds = users.map(user => user._id);
+
         const trip = new Trip({
             name,
             users: userIds
@@ -35,25 +39,48 @@ router.post('/create', async (req, res) => {
 // Add a transaction to a trip
 router.post('/:tripId/transaction', async (req, res) => {
     const { tripId } = req.params;
-    const { userId, amount, description, date } = req.body;
+    const { email, amount, description, date } = req.body;
 
     try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
         const trip = await Trip.findById(tripId);
         if (!trip) {
             return res.status(404).json({ msg: 'Trip not found' });
         }
 
-        const transaction = {
-            userId,
+        const transaction = new Transaction({
+            userId: user._id,
             amount,
             description,
             date
-        };
+        });
 
         trip.transactions.push(transaction);
         await trip.save();
 
         res.json(trip);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Get all trips for a user by email
+router.post('/user-trips', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        const trips = await Trip.find({ users: user._id }).populate('users', '-passwordHash').populate('transactions');
+        res.json(trips);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

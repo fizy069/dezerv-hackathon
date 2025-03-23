@@ -1,12 +1,9 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const transactionSchema = new mongoose.Schema({
-    tripId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Trip',
-    },
+const TransactionSchema = new Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -22,6 +19,6 @@ const transactionSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-}, { timestamps: true });
+});
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+module.exports = mongoose.model('Transaction', TransactionSchema);

@@ -3,7 +3,7 @@ const connectDB = require('./config/db');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = 8001; // Change the port number here
 
 const authRoutes = require('./routes/auth');
 const tripRoutes = require('./routes/trip');
@@ -28,7 +28,7 @@ module.exports = app;
 
 // Start the server if not in Vercel environment
 if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
     });
 }
