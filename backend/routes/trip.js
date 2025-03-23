@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Trip = require('../models/trip');
 const User = require('../models/user');
+const Transaction = require('../models/transaction'); // Import the Transaction model
 
 // Get list of all users
 router.get('/users', async (req, res) => {
@@ -51,12 +52,12 @@ router.post('/:tripId/transaction', async (req, res) => {
             return res.status(404).json({ msg: 'Trip not found' });
         }
 
-        const transaction = {
+        const transaction = new Transaction({
             userId: user._id,
             amount,
             description,
             date
-        };
+        });
 
         trip.transactions.push(transaction);
         await trip.save();
@@ -69,7 +70,7 @@ router.post('/:tripId/transaction', async (req, res) => {
 });
 
 // Get all trips for a user by email
-router.post('/user-trips', async (req, res) => {
+router.get('/user-trips', async (req, res) => {
     const { email } = req.body;
 
     try {
