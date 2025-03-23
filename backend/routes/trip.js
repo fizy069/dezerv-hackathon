@@ -68,6 +68,24 @@ router.post('/:tripId/transaction', async (req, res) => {
     }
 });
 
+// Get all trips for a user by email
+router.post('/user-trips', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        const trips = await Trip.find({ users: user._id }).populate('users', '-passwordHash').populate('transactions');
+        res.json(trips);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 router.post('/:tripId/balance', async (req, res) => {
     const { tripId } = req.params;
     const { email } = req.body;
